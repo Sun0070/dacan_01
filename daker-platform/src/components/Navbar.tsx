@@ -9,6 +9,8 @@ export default function Navbar() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.userAgent);
+  const shortcutLabel = isMac ? '⌘K' : 'Ctrl+K';
 
   const links = [
     { to: '/hackathons', label: '해커톤' },
@@ -45,6 +47,7 @@ export default function Navbar() {
                 <Link
                   key={link.to}
                   to={link.to}
+                  aria-current={isActive(link.to) ? 'page' : undefined}
                   className={`py-1 px-3 text-sm font-medium border-b-2 transition-all duration-200 ${
                     isActive(link.to)
                       ? 'border-b-2 border-indigo-600 text-slate-900 dark:text-white'
@@ -67,7 +70,7 @@ export default function Navbar() {
                 <SearchIcon size={13} />
                 <span className="text-xs">검색</span>
                 <kbd className="text-[10px] text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1 py-0.5 rounded font-sans leading-none">
-                  ⌘K
+                  {shortcutLabel}
                 </kbd>
               </button>
 

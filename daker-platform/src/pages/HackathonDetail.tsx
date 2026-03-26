@@ -15,6 +15,7 @@ import {
   Medal1Icon,
   Medal2Icon,
   Medal3Icon,
+  ShareIcon,
 } from '../components/Icons';
 import {
   addSubmission,
@@ -159,6 +160,27 @@ export default function HackathonDetail() {
       setSubmitForm(initial);
     }
   }, [slug]);
+
+  function copyLink() {
+    const url = window.location.href;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('링크가 복사되었습니다!', 'success');
+      }).catch(() => {
+        showToast('링크 복사에 실패했습니다.', 'error');
+      });
+    } else {
+      // deprecated but intentional fallback for browsers without Clipboard API
+      const el = document.createElement('input');
+      el.value = url;
+      document.body.appendChild(el);
+      el.select();
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast('링크가 복사되었습니다!', 'success');
+    }
+  }
 
   function toggleBookmark() {
     if (!slug) return;
@@ -882,9 +904,18 @@ export default function HackathonDetail() {
               <strong className="text-indigo-600 dark:text-indigo-400">{formatKRW(totalPrize)}</strong>
             </span>
           )}
+          <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={copyLink}
+            className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-all duration-150"
+            aria-label="링크 복사"
+          >
+            <ShareIcon size={14} />
+            공유
+          </button>
           <button
             onClick={toggleBookmark}
-            className={`ml-auto inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-xl border transition-all duration-150 ${
+            className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-xl border transition-all duration-150 ${
               isBookmarked
                 ? 'bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400'
                 : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400'
@@ -898,6 +929,7 @@ export default function HackathonDetail() {
             )}
             {isBookmarked ? '북마크됨' : '북마크'}
           </button>
+          </div>
         </div>
       </div>
 

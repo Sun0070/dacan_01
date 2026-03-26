@@ -561,4 +561,205 @@ export const INITIAL_HACKATHON_DETAILS: Record<string, HackathonDetail> = {
       },
     },
   },
+
+  'cv-challenge-2026-04': {
+    slug: 'cv-challenge-2026-04',
+    title: '컴퓨터 비전 챌린지 2026 : 실시간 객체 탐지 & 분류',
+    sections: {
+      overview: {
+        summary:
+          '자율주행 시나리오 기반의 실시간 멀티클래스 객체 탐지 모델을 개발합니다. 보행자·차량·신호등·표지판 등 10개 클래스를 대상으로 mAP와 추론 속도를 동시에 평가합니다. YOLO, DETR 등 최신 아키텍처 활용을 권장합니다.',
+        teamPolicy: { allowSolo: true, maxTeamSize: 4 },
+      },
+      info: {
+        notice: [
+          '사전 학습된 가중치(pretrained weights) 사용은 허용됩니다.',
+          '추론 시간이 이미지 1장당 50ms를 초과하는 제출물은 감점됩니다.',
+          '외부 데이터셋 사용은 금지됩니다. 제공 데이터만 사용 가능합니다.',
+          '최종 제출 시 모델 가중치와 재현 코드를 포함한 zip 파일을 업로드해야 합니다.',
+        ],
+        links: {
+          rules: 'https://example.com/rules/cv2026',
+          faq: 'https://example.com/faq/cv2026',
+        },
+      },
+      eval: {
+        metricName: 'mAP@0.5:0.95',
+        description: 'COCO 평가 기준 mAP를 기본 지표로, 추론 속도(FPS)를 보조 지표로 활용합니다. 동점 시 FPS 높은 팀이 상위 순위를 차지합니다.',
+        limits: {
+          maxRuntimeSec: 300,
+          maxSubmissionsPerDay: 3,
+        },
+      },
+      schedule: {
+        timezone: 'Asia/Seoul',
+        milestones: [
+          { name: '대회 오픈 및 데이터 공개', at: '2026-06-01T10:00:00+09:00' },
+          { name: '팀 구성 마감', at: '2026-06-10T23:59:00+09:00' },
+          { name: '중간 리더보드 스냅샷', at: '2026-06-15T10:00:00+09:00' },
+          { name: '최종 제출 마감', at: '2026-06-20T10:00:00+09:00' },
+          { name: '코드 검증', at: '2026-06-22T10:00:00+09:00' },
+          { name: '결과 발표', at: '2026-06-25T10:00:00+09:00' },
+        ],
+      },
+      prize: {
+        items: [
+          { place: '1st', amountKRW: 3000000 },
+          { place: '2nd', amountKRW: 1500000 },
+          { place: '3rd', amountKRW: 500000 },
+        ],
+      },
+      teams: {
+        campEnabled: true,
+        listUrl: '/camp?hackathon=cv-challenge-2026-04',
+      },
+      submit: {
+        allowedArtifactTypes: ['zip'],
+        submissionUrl: '/hackathons/cv-challenge-2026-04#submit',
+        guide: [
+          'inference.py와 requirements.txt를 포함한 zip 파일을 업로드합니다.',
+          '모델 가중치 파일(*.pt, *.pth)을 함께 포함해야 합니다.',
+          '제출 횟수는 하루 3회로 제한됩니다.',
+        ],
+      },
+      leaderboard: {
+        publicLeaderboardUrl: '/hackathons/cv-challenge-2026-04#leaderboard',
+        note: 'Public 리더보드는 검증 세트 40% 기준이며, 최종 순위는 나머지 60%로 결정됩니다.',
+      },
+    },
+  },
+
+  'nlp-llm-2026-06': {
+    slug: 'nlp-llm-2026-06',
+    title: 'NLP × LLM 파인튜닝 챌린지 : 한국어 특화 모델 최적화',
+    sections: {
+      overview: {
+        summary:
+          '오픈소스 LLM(Llama, Mistral 등)을 한국어 태스크에 맞게 파인튜닝하여 최고 성능을 달성하는 챌린지입니다. 요약·QA·감성분석 등 3가지 태스크를 통합 평가하며, LoRA/QLoRA 등 경량화 파인튜닝 기법 활용을 권장합니다.',
+        teamPolicy: { allowSolo: true, maxTeamSize: 5 },
+      },
+      info: {
+        notice: [
+          '오픈소스 기반 모델(7B 이하)만 사용 가능합니다.',
+          'GPT-4, Claude 등 상용 API를 파인튜닝 대상으로 사용하는 것은 금지됩니다.',
+          'HuggingFace Hub에 공개된 한국어 데이터셋 사용은 허용됩니다.',
+          '최종 제출 시 파인튜닝 코드와 LoRA 어댑터 가중치를 포함해야 합니다.',
+        ],
+        links: {
+          rules: 'https://example.com/rules/nlpllm2026',
+          faq: 'https://example.com/faq/nlpllm2026',
+        },
+      },
+      eval: {
+        metricName: 'Weighted Score',
+        description: '요약(ROUGE-L, 40%) + QA(Exact Match, 30%) + 감성분석(Macro F1, 30%)을 가중 합산한 통합 점수입니다.',
+        limits: {
+          maxRuntimeSec: 3600,
+          maxSubmissionsPerDay: 2,
+        },
+      },
+      schedule: {
+        timezone: 'Asia/Seoul',
+        milestones: [
+          { name: '대회 오픈 및 데이터 공개', at: '2026-06-16T10:00:00+09:00' },
+          { name: '베이스라인 코드 공개', at: '2026-06-20T10:00:00+09:00' },
+          { name: '중간 리더보드 스냅샷', at: '2026-07-03T10:00:00+09:00' },
+          { name: '최종 제출 마감', at: '2026-07-10T10:00:00+09:00' },
+          { name: '코드 검증 및 재현 확인', at: '2026-07-12T10:00:00+09:00' },
+          { name: '결과 발표', at: '2026-07-15T10:00:00+09:00' },
+        ],
+      },
+      prize: {
+        items: [
+          { place: '1st', amountKRW: 5000000 },
+          { place: '2nd', amountKRW: 2500000 },
+          { place: '3rd', amountKRW: 1000000 },
+        ],
+      },
+      teams: {
+        campEnabled: true,
+        listUrl: '/camp?hackathon=nlp-llm-2026-06',
+      },
+      submit: {
+        allowedArtifactTypes: ['zip'],
+        submissionUrl: '/hackathons/nlp-llm-2026-06#submit',
+        guide: [
+          'LoRA 어댑터 가중치와 파인튜닝 코드를 zip으로 압축하여 제출합니다.',
+          'inference.py 실행 시 GPU 메모리 24GB 이하에서 동작해야 합니다.',
+          '일일 제출 횟수는 2회로 제한됩니다.',
+        ],
+      },
+      leaderboard: {
+        publicLeaderboardUrl: '/hackathons/nlp-llm-2026-06#leaderboard',
+        note: '3개 태스크 가중 합산 점수 기준으로 순위가 결정됩니다.',
+      },
+    },
+  },
+
+  'graph-ml-2026-07': {
+    slug: 'graph-ml-2026-07',
+    title: 'Graph ML 챌린지 : GNN 기반 링크 예측 & 노드 분류',
+    sections: {
+      overview: {
+        summary:
+          '실제 소셜 네트워크 및 지식 그래프 데이터를 활용한 GNN(Graph Neural Network) 기반 링크 예측과 노드 분류 태스크에 도전합니다. PyTorch Geometric, DGL 등 최신 GNN 프레임워크를 활용하여 SOTA 성능을 목표로 합니다.',
+        teamPolicy: { allowSolo: true, maxTeamSize: 4 },
+      },
+      info: {
+        notice: [
+          'PyTorch Geometric 또는 DGL 기반 구현을 권장합니다.',
+          '제공된 그래프 데이터 외 외부 데이터 사용은 금지됩니다.',
+          '노드 피처 엔지니어링과 그래프 증강(Graph Augmentation) 기법 사용은 허용됩니다.',
+          '최종 제출 시 GNN 모델 가중치와 재현 코드를 함께 제출해야 합니다.',
+        ],
+        links: {
+          rules: 'https://example.com/rules/graphml2026',
+          faq: 'https://example.com/faq/graphml2026',
+        },
+      },
+      eval: {
+        metricName: 'Combined Score',
+        description: '링크 예측 AUC-ROC(50%) + 노드 분류 Macro F1(50%)을 동등 가중하여 최종 점수를 산출합니다.',
+        limits: {
+          maxRuntimeSec: 7200,
+          maxSubmissionsPerDay: 2,
+        },
+      },
+      schedule: {
+        timezone: 'Asia/Seoul',
+        milestones: [
+          { name: '대회 오픈 및 데이터 공개', at: '2026-07-14T10:00:00+09:00' },
+          { name: '베이스라인 코드 공개', at: '2026-07-17T10:00:00+09:00' },
+          { name: '중간 리더보드 스냅샷', at: '2026-07-25T10:00:00+09:00' },
+          { name: '최종 제출 마감', at: '2026-08-01T10:00:00+09:00' },
+          { name: '코드 검증', at: '2026-08-04T10:00:00+09:00' },
+          { name: '결과 발표', at: '2026-08-07T10:00:00+09:00' },
+        ],
+      },
+      prize: {
+        items: [
+          { place: '1st', amountKRW: 4000000 },
+          { place: '2nd', amountKRW: 2000000 },
+          { place: '3rd', amountKRW: 800000 },
+        ],
+      },
+      teams: {
+        campEnabled: true,
+        listUrl: '/camp?hackathon=graph-ml-2026-07',
+      },
+      submit: {
+        allowedArtifactTypes: ['zip'],
+        submissionUrl: '/hackathons/graph-ml-2026-07#submit',
+        guide: [
+          'predictions_link.csv와 predictions_node.csv 두 파일을 zip으로 묶어 제출합니다.',
+          '최종 제출 시 모델 가중치와 학습 코드를 포함한 재현 패키지를 업로드합니다.',
+          '일일 제출 횟수는 2회로 제한됩니다.',
+        ],
+      },
+      leaderboard: {
+        publicLeaderboardUrl: '/hackathons/graph-ml-2026-07#leaderboard',
+        note: '링크 예측과 노드 분류 두 태스크의 평균 점수로 순위가 결정됩니다.',
+      },
+    },
+  },
 };

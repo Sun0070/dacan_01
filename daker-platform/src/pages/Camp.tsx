@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import SkeletonCard from '../components/SkeletonCard';
 import TeamCard from '../components/TeamCard';
 import { useToast } from '../context/ToastContext';
-import { SearchIcon, XIcon, PlusIcon, FilterIcon } from '../components/Icons';
+import { SearchIcon, XIcon, PlusIcon, FilterIcon, ChevronLeftIcon, ChevronRightIcon } from '../components/Icons';
 import {
   addTeam,
   deleteTeam,
@@ -50,16 +51,23 @@ function SidebarSection({ title, children }: { title: string; children: React.Re
 
 export default function Camp() {
   const { showToast } = useToast();
+  const location = useLocation();
   const [teams, setTeams] = useState<Team[]>([]);
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
   const [loading, setLoading] = useState(true);
   const [myTeamCodes, setMyTeamCodes] = useState<string[]>([]);
   const [mySkills, setMySkills] = useState<string[]>([]);
+  const [myRole, setMyRole] = useState('');
+  const [myParticipatedSlugs, setMyParticipatedSlugs] = useState<string[]>([]);
+  const [profileName, setProfileName] = useState('');
+  const [carouselPage, setCarouselPage] = useState(0);
 
   const [hackathonFilter, setHackathonFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'closed'>('all');
   const [roleFilter, setRoleFilter] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(
+    (location.state as { searchQuery?: string } | null)?.searchQuery ?? ''
+  );
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -75,6 +83,12 @@ export default function Camp() {
     setHackathons(allHackathons);
     setMyTeamCodes(profile.myTeamCodes);
     setMySkills(profile.skills);
+    setMyRole(profile.role);
+    setProfileName(profile.name);
+    const participatedSlugs = allTeams
+      .filter((t) => profile.myTeamCodes.includes(t.teamCode))
+      .map((t) => t.hackathonSlug);
+    setMyParticipatedSlugs(participatedSlugs);
     setLoading(false);
   }, []);
 
@@ -98,9 +112,57 @@ export default function Camp() {
     return true;
   });
 
-  const recommended =
-    mySkills.length > 0
-      ? teams.filter((t) => t.isOpen && t.lookingFor.some((r) => mySkills.includes(r)))
+  function scoreTeam(team: Team): { pct: number; reasons: string[] } {
+    let score = 0;
+    const reasons: string[] = [];
+
+    // 역할 일치 (가장 높은 가중치)
+    if (myRole && team.lookingFor.includes(myRole)) {
+      score += 40;
+      reasons.push(`${myRole} 역할 필요`);
+    }
+
+    // 스킬 ↔ 찾는 역할 교차 (e.g. "ML Engineer" 스킬 보유)
+    mySkills.forEach((skill) => {
+      if (team.lookingFor.includes(skill)) {
+        score += 10;
+        if (reasons.length < 4) reasons.push(`${skill} 스킬 일치`);
+      }
+    });
+
+    // 소개글 키워드 매칭 (5점/건, 최대 2건)
+    let introHits = 0;
+    mySkills.forEach((skill) => {
+      if (introHits < 2 && team.intro.toLowerCase().includes(skill.toLowerCase())) {
+        score += 5;
+        introHits++;
+        if (reasons.length < 4) reasons.push(`${skill} 관련 프로젝트`);
+      }
+    });
+
+    // 참여 중인 대회 (같은 해커톤)
+    if (myParticipatedSlugs.includes(team.hackathonSlug)) {
+      score += 20;
+      reasons.unshift('참여 중인 대회');
+    }
+
+    // 모집중 보너스
+    if (team.isOpen) score += 5;
+
+    // 100점 만점 환산 (60점 = 100%)
+    const pct = Math.min(100, Math.round((score / 60) * 100));
+    return { pct, reasons: reasons.slice(0, 3) };
+  }
+
+  type ScoredTeam = Team & { pct: number; reasons: string[] };
+
+  const recommended: ScoredTeam[] =
+    mySkills.length > 0 || myRole
+      ? (teams
+          .filter((t) => t.isOpen && !myTeamCodes.includes(t.teamCode))
+          .map((t) => ({ ...t, ...scoreTeam(t) }))
+          .filter((t) => t.pct >= 70)
+          .sort((a, b) => b.pct - a.pct) as ScoredTeam[])
       : [];
 
   const hasActiveFilter =
@@ -389,16 +451,6 @@ export default function Camp() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {/* 모집중 badge */}
-          {!loading && openCount > 0 && (
-            <button
-              onClick={() => setStatusFilter('open')}
-              className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors duration-150"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              {openCount}개 모집중
-            </button>
-          )}
           {/* Mobile filter toggle */}
           <button
             onClick={() => setMobileFilterOpen((v) => !v)}
@@ -442,28 +494,70 @@ export default function Camp() {
 
         {/* ── Right panel ── */}
         <div className="flex-1 min-w-0">
-          {/* Recommended section */}
-          {!loading && recommended.length > 0 && (
-            <div className="mb-6 p-5 bg-indigo-50 dark:bg-indigo-950 rounded-2xl border border-indigo-100 dark:border-indigo-900">
-              <div className="flex items-center gap-2 mb-3">
-                <h2 className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
-                  내 스킬 기반 추천 팀
-                </h2>
-                <span className="text-xs bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-300 rounded-full px-2 py-0.5 font-semibold">
-                  {recommended.length}
-                </span>
+          {/* AI 팀 매칭 추천 */}
+          {!loading && recommended.length > 0 && (() => {
+            const PER_PAGE = 3;
+            const totalPages = Math.ceil(recommended.length / PER_PAGE);
+            const pageTeams = recommended.slice(carouselPage * PER_PAGE, (carouselPage + 1) * PER_PAGE);
+            return (
+              <div className="mb-6">
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-3.5 bg-indigo-600 dark:bg-indigo-700 rounded-t-2xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-sm font-bold">
+                      {profileName ? `${profileName}님 맞춤 팀 추천` : 'AI 팀 매칭'}
+                    </span>
+                    <span className="text-xs bg-white/20 text-white rounded-full px-2 py-0.5 font-semibold">
+                      {recommended.length}팀
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <p className="text-indigo-200 text-xs hidden sm:block">
+                      역할 · 스킬 · 참여 이력 기반 자동 분석
+                    </p>
+                    {totalPages > 1 && (
+                      <span className="text-white/60 text-xs tabular-nums">
+                        {carouselPage + 1}/{totalPages}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {/* Cards with outside arrows */}
+                <div className="relative border border-t-0 border-indigo-200 dark:border-indigo-800 rounded-b-2xl bg-indigo-50 dark:bg-indigo-950/40">
+                  {totalPages > 1 && (
+                    <button
+                      onClick={() => setCarouselPage((p) => Math.max(0, p - 1))}
+                      disabled={carouselPage === 0}
+                      className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-150"
+                    >
+                      <ChevronLeftIcon size={18} />
+                    </button>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 p-4">
+                    {pageTeams.map((team) => (
+                      <TeamCard
+                        key={team.teamCode}
+                        team={team}
+                        hackathonTitle={getHackathonTitle(team.hackathonSlug)}
+                        userRole={myRole}
+                        matchPct={team.pct}
+                        matchReasons={team.reasons}
+                      />
+                    ))}
+                  </div>
+                  {totalPages > 1 && (
+                    <button
+                      onClick={() => setCarouselPage((p) => Math.min(totalPages - 1, p + 1))}
+                      disabled={carouselPage === totalPages - 1}
+                      className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-150"
+                    >
+                      <ChevronRightIcon size={18} />
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {recommended.slice(0, 4).map((team) => (
-                  <TeamCard
-                    key={team.teamCode}
-                    team={team}
-                    hackathonTitle={getHackathonTitle(team.hackathonSlug)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Result count */}
           {!loading && (
@@ -517,6 +611,7 @@ export default function Camp() {
                   key={team.teamCode}
                   team={team}
                   hackathonTitle={getHackathonTitle(team.hackathonSlug)}
+                  userRole={myRole}
                   onEdit={myTeamCodes.includes(team.teamCode) ? () => openEdit(team) : undefined}
                   onDelete={
                     myTeamCodes.includes(team.teamCode) ? () => setDeleteConfirm(team.teamCode) : undefined

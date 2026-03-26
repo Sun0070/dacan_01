@@ -4,6 +4,9 @@ import { EditIcon, TrashIcon, ExternalLinkIcon } from './Icons';
 interface TeamCardProps {
   team: Team;
   hackathonTitle?: string;
+  userRole?: string;
+  matchPct?: number;
+  matchReasons?: string[];
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -36,7 +39,7 @@ function getAvatarText(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
-export default function TeamCard({ team, hackathonTitle, onEdit, onDelete }: TeamCardProps) {
+export default function TeamCard({ team, hackathonTitle, userRole, matchPct, matchReasons, onEdit, onDelete }: TeamCardProps) {
   const avatarColor = getAvatarColor(team.teamCode);
   const avatarText = getAvatarText(team.name);
   const maxDots = Math.min(team.memberCount, 5);
@@ -66,6 +69,11 @@ export default function TeamCard({ team, hackathonTitle, onEdit, onDelete }: Tea
               >
                 {team.isOpen ? '모집중' : '마감'}
               </span>
+              {matchPct !== undefined && (
+                <span className="flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-600 text-white">
+                  {matchPct}% 매칭
+                </span>
+              )}
             </div>
             {hackathonTitle && (
               <p className="text-xs text-indigo-500 dark:text-indigo-400 font-medium mt-0.5 truncate">
@@ -74,6 +82,21 @@ export default function TeamCard({ team, hackathonTitle, onEdit, onDelete }: Tea
             )}
           </div>
         </div>
+
+        {/* Match reasons */}
+        {matchReasons && matchReasons.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 -mt-1">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 self-center">추천 이유</span>
+            {matchReasons.map((reason) => (
+              <span
+                key={reason}
+                className="text-[10px] font-medium bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900 px-1.5 py-0.5 rounded-md"
+              >
+                {reason}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Intro text */}
         <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
@@ -87,14 +110,21 @@ export default function TeamCard({ team, hackathonTitle, onEdit, onDelete }: Tea
           ) : (
             <>
               <span className="text-xs text-slate-400 dark:text-slate-500">찾는 역할</span>
-              {team.lookingFor.map((role) => (
-                <span
-                  key={role}
-                  className="text-xs font-medium bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900 px-2 py-0.5 rounded-md"
-                >
-                  {role}
-                </span>
-              ))}
+              {team.lookingFor.map((role) => {
+                const isMatch = userRole && role === userRole;
+                return (
+                  <span
+                    key={role}
+                    className={`text-xs font-medium px-2 py-0.5 rounded-md ${
+                      isMatch
+                        ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
+                        : 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900'
+                    }`}
+                  >
+                    {role}{isMatch && ' ✓'}
+                  </span>
+                );
+              })}
             </>
           )}
         </div>

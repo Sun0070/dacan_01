@@ -6,6 +6,7 @@ export interface Hackathon {
   thumbnailUrl: string;
   period: {
     timezone: string;
+    startAt?: string;
     submissionDeadlineAt: string;
     endAt: string;
   };

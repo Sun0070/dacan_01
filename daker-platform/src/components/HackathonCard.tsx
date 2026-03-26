@@ -7,6 +7,8 @@ interface HackathonCardProps {
   onBookmark?: () => void;
   isBookmarked?: boolean;
   compact?: boolean;
+  matchPct?: number;
+  matchReasons?: string[];
 }
 
 function getDday(deadline: string): { text: string; badgeClass: string } {
@@ -81,6 +83,8 @@ export default function HackathonCard({
   onBookmark,
   isBookmarked,
   compact: _compact,
+  matchPct,
+  matchReasons,
 }: HackathonCardProps) {
   const navigate = useNavigate();
   const { label, borderColor, badgeClass, dotClass } = statusConfig[hackathon.status];
@@ -92,12 +96,19 @@ export default function HackathonCard({
       onClick={() => navigate(`/hackathons/${hackathon.slug}`)}
     >
       <div className="p-5 flex flex-col gap-3 flex-1">
-        {/* Header row: status badge + bookmark */}
+        {/* Header row: status badge + match pct + bookmark */}
         <div className="flex items-start justify-between">
-          <span className={badgeClass}>
-            <span className={dotClass} />
-            {label}
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={badgeClass}>
+              <span className={dotClass} />
+              {label}
+            </span>
+            {matchPct !== undefined && (
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-600 text-white">
+                {matchPct}% 매칭
+              </span>
+            )}
+          </div>
           {onBookmark && (
             <button
               onClick={(e) => {
@@ -110,6 +121,7 @@ export default function HackathonCard({
                   : 'text-slate-300 dark:text-slate-600 hover:text-amber-400'
               }`}
               aria-label={isBookmarked ? '북마크 제거' : '북마크 추가'}
+              aria-pressed={isBookmarked}
             >
               {isBookmarked ? (
                 <BookmarkFilledIcon size={16} />
@@ -136,9 +148,46 @@ export default function HackathonCard({
             </span>
           ))}
         </div>
+
+        {/* Match reasons */}
+        {matchReasons && matchReasons.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 items-center pt-0.5 border-t border-slate-100 dark:border-slate-800">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500">추천 이유</span>
+            {matchReasons.map((r) => (
+              <span
+                key={r}
+                className="text-[10px] font-medium bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900 px-1.5 py-0.5 rounded-md"
+              >
+                {r}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Footer */}
+      {/* Progress bar for ongoing */}
+      {hackathon.status === 'ongoing' && hackathon.period.startAt && (() => {
+        const start = new Date(hackathon.period.startAt).getTime();
+        const end = new Date(hackathon.period.submissionDeadlineAt).getTime();
+        const now = Date.now();
+        const pct = Math.min(100, Math.max(0, Math.round(((now - start) / (end - start)) * 100)));
+        return (
+          <div className="px-5 pb-1">
+            <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 mb-1">
+              <span>진행률</span>
+              <span>{pct}%</span>
+            </div>
+            <div className="h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 dark:border-slate-800 mt-auto">
         <span className="text-xs text-slate-400 dark:text-slate-500">
           마감 {formatDeadline(hackathon.period.submissionDeadlineAt)}

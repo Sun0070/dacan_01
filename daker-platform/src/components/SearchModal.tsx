@@ -71,7 +71,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     if (result.type === 'hackathon') {
       navigate(`/hackathons/${result.item.slug}`);
     } else {
-      navigate(`/camp`);
+      navigate('/camp', { state: { searchQuery: result.item.name } });
     }
     onClose();
   }
@@ -99,6 +99,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="해커톤, 팀 검색..."
+            aria-label="해커톤 및 팀 검색"
             className="flex-1 bg-transparent outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
           />
           <kbd className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-sans">

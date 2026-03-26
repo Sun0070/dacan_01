@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import HackathonCard from '../components/HackathonCard';
 import SkeletonCard from '../components/SkeletonCard';
-import { FilterIcon, SearchIcon, XIcon } from '../components/Icons';
+import { FilterIcon, SearchIcon, XIcon, ChevronLeftIcon, ChevronRightIcon } from '../components/Icons';
 import { getHackathons, getProfile, setProfile } from '../lib/storage';
+import { getRecommended, type ScoredHackathon } from '../lib/recommend';
 import type { Hackathon } from '../types';
 
 type StatusFilter = 'all' | 'upcoming' | 'ongoing' | 'ended';
@@ -36,12 +37,17 @@ export default function Hackathons() {
   const [tagFilter, setTagFilter]     = useState('');
   const [bookmarks, setBookmarks]     = useState<string[]>([]);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [recommended, setRecommended] = useState<ScoredHackathon[]>([]);
+  const [profileName, setProfileName] = useState('');
+  const [recPage, setRecPage] = useState(0);
 
   useEffect(() => {
     const data = getHackathons();
     const profile = getProfile();
     setHackathons(data);
     setBookmarks(profile.bookmarks);
+    setProfileName(profile.name);
+    setRecommended(getRecommended(data, profile));
     setLoading(false);
   }, []);
 
@@ -72,11 +78,16 @@ export default function Hackathons() {
       h.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
     )
     .filter((h) => !tagFilter || h.tags.includes(tagFilter))
-    .sort((a, b) =>
-      sortOption === 'latest'
-        ? new Date(b.period.endAt).getTime() - new Date(a.period.endAt).getTime()
-        : new Date(a.period.submissionDeadlineAt).getTime() - new Date(b.period.submissionDeadlineAt).getTime()
-    );
+    .sort((a, b) => {
+      if (sortOption === 'latest') {
+        return new Date(b.period.endAt).getTime() - new Date(a.period.endAt).getTime();
+      }
+      // 마감임박순: 종료된 대회는 맨 뒤, 나머지는 마감일 오름차순
+      const aEnded = a.status === 'ended' ? 1 : 0;
+      const bEnded = b.status === 'ended' ? 1 : 0;
+      if (aEnded !== bEnded) return aEnded - bEnded;
+      return new Date(a.period.submissionDeadlineAt).getTime() - new Date(b.period.submissionDeadlineAt).getTime();
+    });
 
   const hasActiveFilter = statusFilter !== 'all' || search !== '' || tagFilter !== '';
 
@@ -216,22 +227,6 @@ export default function Hackathons() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {/* 진행중 badge */}
-          {!loading && counts.ongoing > 0 && (
-            <button
-              onClick={() => setStatusFilter('ongoing')}
-              className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors duration-150"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              {counts.ongoing}개 진행중
-            </button>
-          )}
-          {/* 북마크 badge */}
-          {!loading && bookmarks.length > 0 && (
-            <span className="inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 px-3 py-1.5 rounded-full text-xs font-semibold">
-              북마크 {bookmarks.length}
-            </span>
-          )}
           {/* Mobile filter toggle */}
           <button
             onClick={() => setMobileFilterOpen((v) => !v)}
@@ -267,6 +262,72 @@ export default function Hackathons() {
 
         {/* ── Right panel ── */}
         <div className="flex-1 min-w-0">
+
+          {/* 맞춤 대회 추천 - 필터 없을 때만 표시 */}
+          {!loading && recommended.length > 0 && !hasActiveFilter && (() => {
+            const PER_PAGE = 3;
+            const totalPages = Math.ceil(recommended.length / PER_PAGE);
+            const pageItems = recommended.slice(recPage * PER_PAGE, (recPage + 1) * PER_PAGE);
+            return (
+              <div className="mb-6">
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-3.5 bg-indigo-600 dark:bg-indigo-700 rounded-t-2xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-bold text-sm">
+                      {profileName ? `${profileName}님 맞춤 추천` : '맞춤 대회 추천'}
+                    </span>
+                    <span className="text-xs bg-white/20 text-white rounded-full px-2 py-0.5 font-semibold">
+                      {recommended.length}개
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <p className="text-indigo-200 text-xs hidden sm:block">
+                      역할 · 스킬 · 관심 분야 기반 자동 분석
+                    </p>
+                    {totalPages > 1 && (
+                      <span className="text-white/60 text-xs tabular-nums">
+                        {recPage + 1}/{totalPages}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {/* Cards with outside arrows */}
+                <div className="relative border border-t-0 border-indigo-200 dark:border-indigo-800 rounded-b-2xl bg-indigo-50 dark:bg-indigo-950/40">
+                  {totalPages > 1 && (
+                    <button
+                      onClick={() => setRecPage((p) => Math.max(0, p - 1))}
+                      disabled={recPage === 0}
+                      className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-150"
+                    >
+                      <ChevronLeftIcon size={18} />
+                    </button>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 p-4">
+                    {pageItems.map((h) => (
+                      <HackathonCard
+                        key={h.slug}
+                        hackathon={h}
+                        isBookmarked={bookmarks.includes(h.slug)}
+                        onBookmark={() => toggleBookmark(h.slug)}
+                        matchPct={h.matchPct}
+                        matchReasons={h.matchReasons}
+                      />
+                    ))}
+                  </div>
+                  {totalPages > 1 && (
+                    <button
+                      onClick={() => setRecPage((p) => Math.min(totalPages - 1, p + 1))}
+                      disabled={recPage === totalPages - 1}
+                      className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-150"
+                    >
+                      <ChevronRightIcon size={18} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Result count */}
           {!loading && (
             <div className="flex items-center gap-3 mb-5">

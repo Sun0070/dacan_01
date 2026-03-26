@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import HackathonCard from '../components/HackathonCard';
 import TeamCard from '../components/TeamCard';
 import { useToast } from '../context/ToastContext';
-import { TrophyIcon, UsersIcon, FileIcon, EditIcon, XIcon } from '../components/Icons';
+import { TrophyIcon, UsersIcon, FileIcon, EditIcon, XIcon, AwardIcon } from '../components/Icons';
 import {
   deleteTeam,
   getHackathons,
+  getLeaderboards,
   getProfile,
   getSubmissions,
   getTeams,
@@ -64,10 +65,12 @@ export default function MyDashboard() {
   const [customSkill, setCustomSkill] = useState('');
 
   const [bookmarkedHackathons, setBookmarkedHackathons] = useState<Hackathon[]>([]);
+  const [participatingHackathons, setParticipatingHackathons] = useState<Hackathon[]>([]);
   const [myTeams, setMyTeams] = useState<Team[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
 
+  const [bestRank, setBestRank] = useState<number | null>(null);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
@@ -86,6 +89,23 @@ export default function MyDashboard() {
 
     const myT = allTeams.filter((t) => p.myTeamCodes.includes(t.teamCode));
     setMyTeams(myT);
+
+    const participatingSlugs = [...new Set(myT.map((t) => t.hackathonSlug))];
+    setParticipatingHackathons(
+      allHackathons.filter((h) => participatingSlugs.includes(h.slug))
+    );
+
+    const myTeamNames = myT.map((t) => t.name);
+    const allLeaderboards = getLeaderboards();
+    let best: number | null = null;
+    for (const lb of allLeaderboards) {
+      for (const entry of lb.entries) {
+        if (myTeamNames.includes(entry.teamName)) {
+          if (best === null || entry.rank < best) best = entry.rank;
+        }
+      }
+    }
+    setBestRank(best);
 
     setSubmissions(allSubmissions);
   }, []);
@@ -349,25 +369,35 @@ export default function MyDashboard() {
       )}
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
         {[
           {
-            label: '북마크 해커톤',
-            value: profile.bookmarks.length,
-            section: 'bookmarks',
+            label: '참여 해커톤',
+            value: participatingHackathons.length,
+            display: String(participatingHackathons.length),
+            section: 'participating',
             Icon: TrophyIcon,
           },
           {
             label: '생성한 팀',
             value: myTeams.length,
+            display: String(myTeams.length),
             section: 'myteams',
             Icon: UsersIcon,
           },
           {
             label: '제출 횟수',
             value: submissions.length,
+            display: String(submissions.length),
             section: 'submissions',
             Icon: FileIcon,
+          },
+          {
+            label: '최고 순위',
+            value: bestRank ?? 0,
+            display: bestRank !== null ? `${bestRank}위` : '-',
+            section: 'submissions',
+            Icon: AwardIcon,
           },
         ].map((stat) => {
           const Icon = stat.Icon;
@@ -381,13 +411,35 @@ export default function MyDashboard() {
                 <Icon size={18} />
               </div>
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                {stat.value}
+                {stat.display}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{stat.label}</div>
             </button>
           );
         })}
       </div>
+
+      {/* Participating Hackathons */}
+      <section id="participating" className="mb-10 scroll-mt-20">
+        <SectionDivider title="참여중인 해커톤" />
+        {participatingHackathons.length === 0 ? (
+          <div className="text-center py-10 text-slate-400 dark:text-slate-500">
+            <p className="text-sm">참여중인 해커톤이 없습니다.</p>
+            <p className="text-xs mt-1">팀에 합류하면 여기에 표시됩니다.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {participatingHackathons.map((h) => (
+              <HackathonCard
+                key={h.slug}
+                hackathon={h}
+                isBookmarked={profile.bookmarks.includes(h.slug)}
+                onBookmark={() => toggleBookmark(h.slug)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Bookmarked Hackathons */}
       <section id="bookmarks" className="mb-10 scroll-mt-20">

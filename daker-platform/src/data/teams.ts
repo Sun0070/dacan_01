@@ -235,4 +235,78 @@ export const INITIAL_TEAMS: Team[] = [
     contact: { type: 'link', url: 'https://forms.gle/itemwizards' },
     createdAt: '2026-03-24T15:00:00+09:00',
   },
+
+  // ── cv-challenge-2026-04 (예정) ───────────────────────────────────────
+  {
+    teamCode: 'T-CV26-01',
+    hackathonSlug: 'cv-challenge-2026-04',
+    name: 'VisionForge',
+    isOpen: true,
+    memberCount: 2,
+    lookingFor: ['ML Engineer', 'Data Scientist'],
+    intro: 'YOLOv9 + SAM 조합으로 실시간 탐지 최적화 중. PyTorch Deep Learning 경험자 환영합니다.',
+    contact: { type: 'link', url: 'https://open.kakao.com/o/visionforge' },
+    createdAt: '2026-03-20T10:00:00+09:00',
+  },
+  {
+    teamCode: 'T-CV26-02',
+    hackathonSlug: 'cv-challenge-2026-04',
+    name: 'DetectPro',
+    isOpen: true,
+    memberCount: 1,
+    lookingFor: ['ML Engineer', 'Backend'],
+    intro: 'DETR 기반 트랜스포머 모델 실험 중. CV · ObjectDetection 경험자 팀 합류 환영!',
+    contact: { type: 'link', url: 'https://forms.gle/detectpro' },
+    createdAt: '2026-03-21T14:00:00+09:00',
+  },
+
+  // ── nlp-llm-2026-06 (예정) ────────────────────────────────────────────
+  {
+    teamCode: 'T-NLPLLM-01',
+    hackathonSlug: 'nlp-llm-2026-06',
+    name: 'KoLLM Team',
+    isOpen: true,
+    memberCount: 2,
+    lookingFor: ['ML Engineer', 'Data Scientist'],
+    intro: 'HuggingFace + LoRA 파인튜닝으로 한국어 LLM 특화 모델 개발 중. NLP · BERT 경험자 환영.',
+    contact: { type: 'link', url: 'https://open.kakao.com/o/kollmteam' },
+    createdAt: '2026-03-22T09:00:00+09:00',
+  },
+  {
+    teamCode: 'T-NLPLLM-02',
+    hackathonSlug: 'nlp-llm-2026-06',
+    name: 'LangCraft',
+    isOpen: true,
+    memberCount: 3,
+    lookingFor: ['ML Engineer', 'Backend'],
+    intro: 'QLoRA 경량화 파인튜닝 + RLHF 실험 팀. PyTorch Deep Learning 실무 경험자 모집합니다.',
+    contact: { type: 'link', url: 'https://forms.gle/langcraft' },
+    createdAt: '2026-03-23T16:00:00+09:00',
+  },
+
+  // ── graph-ml-2026-07 (예정) ───────────────────────────────────────────
+  {
+    teamCode: 'T-GNN-01',
+    hackathonSlug: 'graph-ml-2026-07',
+    name: 'GraphMinds',
+    isOpen: true,
+    memberCount: 2,
+    lookingFor: ['ML Engineer', 'Data Scientist', 'Backend'],
+    intro: 'GraphSAGE + GAT 기반 링크 예측 모델 연구. PyTorch Geometric 활용, GNN 관심자 환영!',
+    contact: { type: 'link', url: 'https://open.kakao.com/o/graphminds' },
+    createdAt: '2026-03-24T11:00:00+09:00',
+  },
+
+  // ── multimodal-ai-2026-05 (예정) ──────────────────────────────────────
+  {
+    teamCode: 'T-MODAL-01',
+    hackathonSlug: 'multimodal-ai-2026-05',
+    name: 'FusionLab',
+    isOpen: true,
+    memberCount: 2,
+    lookingFor: ['ML Engineer', 'Data Scientist'],
+    intro: 'CLIP + LLaVA 기반 이미지-텍스트 융합 모델 실험. Deep Learning · Multimodal 경험자 환영합니다.',
+    contact: { type: 'link', url: 'https://forms.gle/fusionlab' },
+    createdAt: '2026-03-25T13:00:00+09:00',
+  },
 ];

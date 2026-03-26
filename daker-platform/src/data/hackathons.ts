@@ -62,6 +62,7 @@ export const INITIAL_HACKATHONS: Hackathon[] = [
     thumbnailUrl: 'https://example.com/public/img/vibe202603.png',
     period: {
       timezone: 'Asia/Seoul',
+      startAt: '2026-03-01T10:00:00+09:00',
       submissionDeadlineAt: '2026-04-10T10:00:00+09:00',
       endAt: '2026-04-15T10:00:00+09:00',
     },
@@ -79,6 +80,7 @@ export const INITIAL_HACKATHONS: Hackathon[] = [
     thumbnailUrl: 'https://example.com/public/img/ts2026.png',
     period: {
       timezone: 'Asia/Seoul',
+      startAt: '2026-03-10T10:00:00+09:00',
       submissionDeadlineAt: '2026-04-20T10:00:00+09:00',
       endAt: '2026-04-25T10:00:00+09:00',
     },
@@ -138,6 +140,57 @@ export const INITIAL_HACKATHONS: Hackathon[] = [
       detail: '/hackathons/multimodal-ai-2026-05',
       rules: 'https://example.com/rules/multimodal2026',
       faq: 'https://example.com/faq/multimodal2026',
+    },
+  },
+  {
+    slug: 'cv-challenge-2026-04',
+    title: '컴퓨터 비전 챌린지 2026 : 실시간 객체 탐지 & 분류',
+    status: 'upcoming',
+    tags: ['CV', 'ObjectDetection', 'PyTorch', 'YOLO', 'Deep Learning'],
+    thumbnailUrl: 'https://example.com/public/img/cv2026.png',
+    period: {
+      timezone: 'Asia/Seoul',
+      submissionDeadlineAt: '2026-06-20T10:00:00+09:00',
+      endAt: '2026-06-25T10:00:00+09:00',
+    },
+    links: {
+      detail: '/hackathons/cv-challenge-2026-04',
+      rules: 'https://example.com/rules/cv2026',
+      faq: 'https://example.com/faq/cv2026',
+    },
+  },
+  {
+    slug: 'nlp-llm-2026-06',
+    title: 'NLP × LLM 파인튜닝 챌린지 : 한국어 특화 모델 최적화',
+    status: 'upcoming',
+    tags: ['NLP', 'LLM', 'HuggingFace', 'PyTorch', 'BERT'],
+    thumbnailUrl: 'https://example.com/public/img/nlpllm2026.png',
+    period: {
+      timezone: 'Asia/Seoul',
+      submissionDeadlineAt: '2026-07-10T10:00:00+09:00',
+      endAt: '2026-07-15T10:00:00+09:00',
+    },
+    links: {
+      detail: '/hackathons/nlp-llm-2026-06',
+      rules: 'https://example.com/rules/nlpllm2026',
+      faq: 'https://example.com/faq/nlpllm2026',
+    },
+  },
+  {
+    slug: 'graph-ml-2026-07',
+    title: 'Graph ML 챌린지 : GNN 기반 링크 예측 & 노드 분류',
+    status: 'upcoming',
+    tags: ['GNN', 'PyTorch', 'Deep Learning', 'Python', 'ML'],
+    thumbnailUrl: 'https://example.com/public/img/graphml2026.png',
+    period: {
+      timezone: 'Asia/Seoul',
+      submissionDeadlineAt: '2026-08-01T10:00:00+09:00',
+      endAt: '2026-08-07T10:00:00+09:00',
+    },
+    links: {
+      detail: '/hackathons/graph-ml-2026-07',
+      rules: 'https://example.com/rules/graphml2026',
+      faq: 'https://example.com/faq/graphml2026',
     },
   },
 ];

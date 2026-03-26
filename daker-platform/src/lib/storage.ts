@@ -7,7 +7,7 @@ const KEYS = {
   LEADERBOARDS: 'daker_leaderboards',
   SUBMISSIONS: 'daker_submissions',
   PROFILE: 'daker_profile',
-  SEEDED: 'daker_seeded_v3',
+  SEEDED: 'daker_seeded_v4',
   THEME: 'daker_theme',
 };
 
