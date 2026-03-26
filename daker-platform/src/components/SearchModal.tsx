@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getHackathons, getTeams } from '../lib/storage';
+import { SearchIcon, ChevronRightIcon } from './Icons';
 import type { Hackathon, Team } from '../types';
 
 interface SearchModalProps {
@@ -91,7 +92,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       >
         {/* Search input */}
         <div className="flex items-center gap-3 px-4 py-3.5 border-b border-slate-100 dark:border-slate-800">
-          <span className="text-slate-400 text-base">🔍</span>
+          <span className="text-slate-400 flex-shrink-0"><SearchIcon size={15} /></span>
           <input
             ref={inputRef}
             type="text"
@@ -122,8 +123,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         onClick={() => handleSelect(r)}
                         className="w-full text-left px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors duration-150 flex items-center gap-3"
                       >
-                        <span className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-base flex-shrink-0">
-                          ▸
+                        <span className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-indigo-500 dark:text-indigo-400 flex-shrink-0">
+                          <ChevronRightIcon size={14} />
                         </span>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
@@ -146,8 +147,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         onClick={() => handleSelect(r)}
                         className="w-full text-left px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors duration-150 flex items-center gap-3"
                       >
-                        <span className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-base flex-shrink-0">
-                          ▸
+                        <span className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 flex-shrink-0">
+                          <ChevronRightIcon size={14} />
                         </span>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">

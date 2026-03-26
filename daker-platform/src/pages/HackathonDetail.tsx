@@ -4,6 +4,19 @@ import TeamCard from '../components/TeamCard';
 import Timeline from '../components/Timeline';
 import { useToast } from '../context/ToastContext';
 import {
+  BookmarkIcon,
+  BookmarkFilledIcon,
+  AlertIcon,
+  CalendarIcon,
+  ChartIcon,
+  TrophyIcon,
+  FileIcon,
+  UserIcon,
+  Medal1Icon,
+  Medal2Icon,
+  Medal3Icon,
+} from '../components/Icons';
+import {
   addSubmission,
   getHackathonDetails,
   getHackathons,
@@ -17,15 +30,15 @@ import type { Hackathon, HackathonDetail, LeaderboardData, Submission, Team } fr
 
 type TabKey = 'overview' | 'info' | 'eval' | 'schedule' | 'prize' | 'teams' | 'submit' | 'leaderboard';
 
-const tabLabels: { key: TabKey; label: string }[] = [
-  { key: 'overview', label: '개요' },
-  { key: 'info', label: '안내' },
-  { key: 'eval', label: '평가' },
-  { key: 'schedule', label: '일정' },
-  { key: 'prize', label: '상금' },
-  { key: 'teams', label: '팀' },
-  { key: 'submit', label: '제출' },
-  { key: 'leaderboard', label: '리더보드' },
+const tabLabels: { key: TabKey; label: string; icon: React.FC<{ size?: number; className?: string }> }[] = [
+  { key: 'overview', label: '개요', icon: UserIcon },
+  { key: 'info', label: '안내', icon: AlertIcon },
+  { key: 'eval', label: '평가', icon: ChartIcon },
+  { key: 'schedule', label: '일정', icon: CalendarIcon },
+  { key: 'prize', label: '상금', icon: TrophyIcon },
+  { key: 'teams', label: '팀', icon: UserIcon },
+  { key: 'submit', label: '제출', icon: FileIcon },
+  { key: 'leaderboard', label: '리더보드', icon: ChartIcon },
 ];
 
 function formatKRW(amount: number): string {
@@ -42,16 +55,40 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function getDday(deadline: string): { text: string; className: string } {
+function getDday(deadline: string): { text: string; badgeClass: string } {
   const now = new Date();
   const target = new Date(deadline);
   const diffMs = target.getTime() - now.getTime();
   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays < 0) return { text: '마감', className: 'text-slate-400' };
-  if (diffDays === 0) return { text: 'D-Day', className: 'text-rose-600 dark:text-rose-400 font-black' };
-  if (diffDays <= 5) return { text: `D-${diffDays}`, className: 'text-rose-600 dark:text-rose-400 font-bold' };
-  if (diffDays <= 15) return { text: `D-${diffDays}`, className: 'text-amber-600 dark:text-amber-400 font-semibold' };
-  return { text: `D-${diffDays}`, className: 'text-slate-500 dark:text-slate-400' };
+  if (diffDays < 0) {
+    return { text: '마감', badgeClass: 'text-slate-400 dark:text-slate-500 text-sm' };
+  }
+  if (diffDays === 0) {
+    return {
+      text: 'D-Day',
+      badgeClass:
+        'rounded-full px-2.5 py-0.5 text-xs font-bold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
+    };
+  }
+  if (diffDays <= 5) {
+    return {
+      text: `D-${diffDays}`,
+      badgeClass:
+        'rounded-full px-2.5 py-0.5 text-xs font-bold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
+    };
+  }
+  if (diffDays <= 15) {
+    return {
+      text: `D-${diffDays}`,
+      badgeClass:
+        'rounded-full px-2.5 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+    };
+  }
+  return {
+    text: `D-${diffDays}`,
+    badgeClass:
+      'rounded-full px-2.5 py-0.5 text-xs font-bold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+  };
 }
 
 const placeLabels: Record<string, string> = {
@@ -160,7 +197,7 @@ export default function HackathonDetail() {
   if (notFound) {
     return (
       <div className="max-w-4xl mx-auto px-6 sm:px-8 py-20 text-center">
-        <p className="text-6xl font-black text-slate-100 dark:text-slate-800 mb-6 select-none">404</p>
+        <p className="text-7xl font-black text-slate-100 dark:text-slate-800 mb-6 select-none">404</p>
         <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
           상세 정보를 불러올 수 없습니다
         </h2>
@@ -191,17 +228,20 @@ export default function HackathonDetail() {
   const statusConfig = {
     upcoming: {
       label: '예정',
-      badgeClass: 'inline-flex items-center gap-1.5 text-xs font-medium text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-950 border border-violet-200 dark:border-violet-800 px-2 py-0.5 rounded-full',
+      badgeClass:
+        'inline-flex items-center gap-1.5 text-xs font-medium text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-950 border border-violet-200 dark:border-violet-800 px-2 py-0.5 rounded-full',
       dotClass: 'w-1.5 h-1.5 rounded-full bg-violet-400',
     },
     ongoing: {
       label: '진행중',
-      badgeClass: 'inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full',
+      badgeClass:
+        'inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full',
       dotClass: 'w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse',
     },
     ended: {
       label: '종료',
-      badgeClass: 'inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-full',
+      badgeClass:
+        'inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-full',
       dotClass: 'w-1.5 h-1.5 rounded-full bg-slate-400',
     },
   };
@@ -246,7 +286,13 @@ export default function HackathonDetail() {
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="flex items-start gap-3">
-                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 ${s.overview.teamPolicy.allowSolo ? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300' : 'bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300'}`}>
+                        <span
+                          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 ${
+                            s.overview.teamPolicy.allowSolo
+                              ? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300'
+                              : 'bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300'
+                          }`}
+                        >
                           {s.overview.teamPolicy.allowSolo ? '✓' : '✕'}
                         </span>
                         <div>
@@ -285,7 +331,9 @@ export default function HackathonDetail() {
                 <ul className="space-y-2.5">
                   {s.info.notice.map((n, i) => (
                     <li key={i} className="flex gap-2.5 items-start text-sm text-slate-600 dark:text-slate-400">
-                      <span className="text-amber-500 mt-0.5 flex-shrink-0">⚠</span>
+                      <span className="text-amber-500 mt-0.5 flex-shrink-0">
+                        <AlertIcon size={14} />
+                      </span>
                       <span>{n}</span>
                     </li>
                   ))}
@@ -299,7 +347,7 @@ export default function HackathonDetail() {
                         rel="noopener noreferrer"
                         className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
                       >
-                        규정 보기 →
+                        규정 보기
                       </a>
                     )}
                     {s.info.links.faq && (
@@ -309,7 +357,7 @@ export default function HackathonDetail() {
                         rel="noopener noreferrer"
                         className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
                       >
-                        FAQ 보기 →
+                        FAQ 보기
                       </a>
                     )}
                   </div>
@@ -332,7 +380,9 @@ export default function HackathonDetail() {
                     {s.eval.metricName}
                   </p>
                 </div>
-                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{s.eval.description}</p>
+                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                  {s.eval.description}
+                </p>
 
                 {s.eval.scoreDisplay && (
                   <div className="mt-4">
@@ -416,17 +466,24 @@ export default function HackathonDetail() {
                     const is1st = item.place === '1st';
                     const is2nd = item.place === '2nd';
                     const cardClass = is1st
-                      ? 'border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/50'
+                      ? 'ring-2 ring-amber-400 bg-gradient-to-b from-amber-50 to-white dark:from-amber-950/30 dark:to-slate-900 border border-amber-200 dark:border-amber-800'
                       : is2nd
-                      ? 'border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900'
-                      : 'border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-950/50';
-                    const medalSymbol = is1st ? '🥇' : is2nd ? '🥈' : '🥉';
+                      ? 'border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900'
+                      : 'border border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20';
+                    const MedalIcon = is1st ? Medal1Icon : is2nd ? Medal2Icon : Medal3Icon;
+                    const medalColor = is1st
+                      ? 'text-amber-500'
+                      : is2nd
+                      ? 'text-slate-400'
+                      : 'text-orange-400';
                     return (
                       <div
                         key={item.place}
                         className={`rounded-2xl p-5 text-center ${cardClass}`}
                       >
-                        <div className="text-3xl mb-2">{medalSymbol}</div>
+                        <div className={`flex justify-center mb-3 ${medalColor}`}>
+                          <MedalIcon size={32} />
+                        </div>
                         <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                           {placeLabels[item.place] ?? item.place}
                         </p>
@@ -442,8 +499,12 @@ export default function HackathonDetail() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-slate-200 dark:border-slate-700">
-                          <th className="text-left py-3 px-4 text-slate-500 dark:text-slate-400 font-medium text-xs uppercase tracking-wide">순위</th>
-                          <th className="text-right py-3 px-4 text-slate-500 dark:text-slate-400 font-medium text-xs uppercase tracking-wide">상금</th>
+                          <th className="text-left py-3 px-4 text-slate-500 dark:text-slate-400 font-medium text-xs uppercase tracking-wide">
+                            순위
+                          </th>
+                          <th className="text-right py-3 px-4 text-slate-500 dark:text-slate-400 font-medium text-xs uppercase tracking-wide">
+                            상금
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -487,7 +548,9 @@ export default function HackathonDetail() {
             </div>
             {teams.length === 0 ? (
               <div className="text-center py-16 text-slate-400 dark:text-slate-500">
-                <p className="text-3xl font-black text-slate-100 dark:text-slate-800 mb-3 select-none">팀 없음</p>
+                <p className="text-3xl font-black text-slate-100 dark:text-slate-800 mb-3 select-none">
+                  팀 없음
+                </p>
                 <p className="text-sm">아직 팀이 없습니다.</p>
               </div>
             ) : (
@@ -506,10 +569,15 @@ export default function HackathonDetail() {
             {s.submit ? (
               <>
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">제출 가이드</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">
+                    제출 가이드
+                  </h3>
                   <ol className="space-y-2.5">
                     {s.submit.guide.map((step, i) => (
-                      <li key={i} className="flex gap-3 text-sm text-slate-600 dark:text-slate-400">
+                      <li
+                        key={i}
+                        className="flex gap-3 text-sm text-slate-600 dark:text-slate-400"
+                      >
                         <span className="flex-shrink-0 w-6 h-6 bg-indigo-600 text-white rounded-lg text-xs flex items-center justify-center font-bold">
                           {i + 1}
                         </span>
@@ -521,9 +589,14 @@ export default function HackathonDetail() {
 
                 {s.submit.submissionItems && s.submit.submissionItems.length > 0 ? (
                   <form onSubmit={handleSubmit} className="space-y-4">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">제출 폼</h3>
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      제출 폼
+                    </h3>
                     {s.submit.submissionItems.map((item) => (
-                      <div key={item.key}>
+                      <div
+                        key={item.key}
+                        className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl p-4"
+                      >
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                           {item.title}
                         </label>
@@ -581,7 +654,9 @@ export default function HackathonDetail() {
                             <span className="font-medium text-slate-900 dark:text-slate-100">
                               {sub.teamName}
                             </span>
-                            <span className="text-xs text-slate-400 dark:text-slate-500">{formatDate(sub.submittedAt)}</span>
+                            <span className="text-xs text-slate-400 dark:text-slate-500">
+                              {formatDate(sub.submittedAt)}
+                            </span>
                           </div>
                           <div className="mt-2 space-y-1 text-xs text-slate-500 dark:text-slate-400">
                             {sub.items.plan && <p>기획서: {sub.items.plan}</p>}
@@ -610,7 +685,9 @@ export default function HackathonDetail() {
             )}
             {!leaderboard || leaderboard.entries.length === 0 ? (
               <div className="text-center py-16 text-slate-400 dark:text-slate-500">
-                <p className="text-3xl font-black text-slate-100 dark:text-slate-800 mb-3 select-none">데이터 없음</p>
+                <p className="text-3xl font-black text-slate-100 dark:text-slate-800 mb-3 select-none">
+                  데이터 없음
+                </p>
                 <p className="text-sm">아직 리더보드 데이터가 없습니다.</p>
               </div>
             ) : (
@@ -623,36 +700,75 @@ export default function HackathonDetail() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-left">
-                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide w-12">순위</th>
-                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide">팀명</th>
-                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide text-right">점수</th>
-                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide text-right hidden sm:table-cell">참가자</th>
-                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide text-right hidden sm:table-cell">심사위원</th>
-                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide hidden md:table-cell">제출일시</th>
-                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide">결과물</th>
+                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide w-12">
+                            순위
+                          </th>
+                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide">
+                            팀명
+                          </th>
+                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide text-right">
+                            점수
+                          </th>
+                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide text-right hidden sm:table-cell">
+                            참가자
+                          </th>
+                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide text-right hidden sm:table-cell">
+                            심사위원
+                          </th>
+                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide hidden md:table-cell">
+                            제출일시
+                          </th>
+                          <th className="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wide">
+                            결과물
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {leaderboard.entries.map((entry) => (
                           <tr
                             key={entry.rank}
-                            className={`hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors ${
-                              entry.rank === 1 ? 'border-l-4 border-l-amber-400' : entry.rank === 2 ? 'border-l-4 border-l-slate-400' : entry.rank === 3 ? 'border-l-4 border-l-orange-400' : ''
+                            className={`transition-colors ${
+                              entry.rank % 2 === 0
+                                ? 'bg-slate-50/50 dark:bg-slate-900/50'
+                                : 'bg-white dark:bg-slate-950'
+                            } hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20 ${
+                              entry.rank === 1
+                                ? 'border-l-4 border-l-amber-400'
+                                : entry.rank === 2
+                                ? 'border-l-4 border-l-slate-400'
+                                : entry.rank === 3
+                                ? 'border-l-4 border-l-orange-400'
+                                : ''
                             }`}
                           >
                             <td className="py-3 px-4 font-bold text-slate-900 dark:text-slate-100">
-                              {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}
+                              <div className="flex items-center gap-1.5">
+                                {entry.rank === 1 ? (
+                                  <span className="text-amber-500">
+                                    <Medal1Icon size={14} />
+                                  </span>
+                                ) : entry.rank === 2 ? (
+                                  <span className="text-slate-400">
+                                    <Medal2Icon size={14} />
+                                  </span>
+                                ) : entry.rank === 3 ? (
+                                  <span className="text-orange-400">
+                                    <Medal3Icon size={14} />
+                                  </span>
+                                ) : null}
+                                {entry.rank}
+                              </div>
                             </td>
                             <td className="py-3 px-4 font-medium text-slate-900 dark:text-slate-100">
                               {entry.teamName}
                             </td>
-                            <td className="py-3 px-4 text-right font-bold text-indigo-600 dark:text-indigo-400">
+                            <td className="py-3 px-4 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">
                               {entry.score}점
                             </td>
-                            <td className="py-3 px-4 text-right text-slate-500 dark:text-slate-400 hidden sm:table-cell text-xs">
+                            <td className="py-3 px-4 text-right text-slate-500 dark:text-slate-400 hidden sm:table-cell text-xs font-mono">
                               {entry.scoreBreakdown?.participant ?? '-'}
                             </td>
-                            <td className="py-3 px-4 text-right text-slate-500 dark:text-slate-400 hidden sm:table-cell text-xs">
+                            <td className="py-3 px-4 text-right text-slate-500 dark:text-slate-400 hidden sm:table-cell text-xs font-mono">
                               {entry.scoreBreakdown?.judge ?? '-'}
                             </td>
                             <td className="py-3 px-4 text-xs text-slate-400 dark:text-slate-500 hidden md:table-cell">
@@ -700,12 +816,15 @@ export default function HackathonDetail() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 sm:px-8">
-      {/* Clean Header */}
+      {/* Header */}
       <div className="border-b border-slate-100 dark:border-slate-800 pt-8 pb-6 mb-0">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500 mb-4">
-          <Link to="/hackathons" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-            해커톤
+          <Link
+            to="/hackathons"
+            className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+          >
+            목록으로
           </Link>
           <span>/</span>
           <span className="text-slate-600 dark:text-slate-300 truncate max-w-[200px]">
@@ -722,7 +841,7 @@ export default function HackathonDetail() {
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight leading-tight mb-4">
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-slate-50 leading-tight mb-4">
           {hackathonTitle || detail.title}
         </h1>
 
@@ -741,10 +860,10 @@ export default function HackathonDetail() {
         )}
 
         {/* Meta row */}
-        <div className="flex flex-wrap items-center gap-4 text-sm">
+        <div className="flex flex-wrap items-center gap-3">
           {hackathon && ddayInfo && (
             <>
-              <span className="text-slate-500 dark:text-slate-400">
+              <span className="text-sm text-slate-500 dark:text-slate-400">
                 마감{' '}
                 <strong className="text-slate-700 dark:text-slate-300">
                   {new Date(hackathon.period.submissionDeadlineAt).toLocaleDateString('ko-KR', {
@@ -754,25 +873,30 @@ export default function HackathonDetail() {
                   })}
                 </strong>
               </span>
-              <span className={`text-sm ${ddayInfo.className}`}>{ddayInfo.text}</span>
+              <span className={ddayInfo.badgeClass}>{ddayInfo.text}</span>
             </>
           )}
           {totalPrize !== null && (
-            <span className="text-slate-500 dark:text-slate-400">
+            <span className="text-sm text-slate-500 dark:text-slate-400">
               총 상금{' '}
               <strong className="text-indigo-600 dark:text-indigo-400">{formatKRW(totalPrize)}</strong>
             </span>
           )}
           <button
             onClick={toggleBookmark}
-            className={`ml-auto text-sm font-medium px-3 py-1.5 rounded-xl border transition-all duration-150 ${
+            className={`ml-auto inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-xl border transition-all duration-150 ${
               isBookmarked
                 ? 'bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400'
                 : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400'
             }`}
             aria-label={isBookmarked ? '북마크 해제' : '북마크 추가'}
           >
-            {isBookmarked ? '★ 북마크됨' : '☆ 북마크'}
+            {isBookmarked ? (
+              <BookmarkFilledIcon size={14} />
+            ) : (
+              <BookmarkIcon size={14} />
+            )}
+            {isBookmarked ? '북마크됨' : '북마크'}
           </button>
         </div>
       </div>
@@ -780,22 +904,26 @@ export default function HackathonDetail() {
       {/* Sticky Tab Bar */}
       <div
         ref={tabBarRef}
-        className="sticky top-16 z-30 bg-white dark:bg-slate-950 -mx-6 sm:-mx-8 px-6 sm:px-8 border-b border-slate-200 dark:border-slate-800"
+        className="sticky top-14 z-30 bg-white dark:bg-slate-950 -mx-6 sm:-mx-8 px-6 sm:px-8 border-b border-slate-200 dark:border-slate-800"
       >
         <div className="flex overflow-x-auto gap-0 hide-scrollbar">
-          {tabLabels.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex-shrink-0 px-3 py-3 text-sm font-medium border-b-2 transition-all duration-150 ${
-                activeTab === tab.key
-                  ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          {tabLabels.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-3.5 text-sm font-medium border-b-2 transition-all duration-150 ${
+                  activeTab === tab.key
+                    ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                <Icon size={14} />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
